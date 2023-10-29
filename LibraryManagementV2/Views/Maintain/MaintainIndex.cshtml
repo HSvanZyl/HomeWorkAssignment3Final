@@ -1,0 +1,274 @@
+﻿@model LibraryManagementV2.Models.MaintainViewModel
+@using PagedList.Mvc
+@{
+    ViewBag.Title = "MaintainIndex";
+}
+
+
+<style>
+
+    .header {
+        background-color: #7F0909; /* Gryffindor Red */
+        color: #FFD100; /* Gryffindor Gold */
+        text-align: center;
+        padding: 20px;
+        font-family: 'Harry Potter', cursive; /* Use a Harry Potter font */
+    }
+
+    .pagination-container {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .pagination {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+        .pagination li {
+            display: inline;
+            margin-right: 5px;
+        }
+
+            .pagination li a {
+                text-decoration: none;
+                padding: 5px 10px;
+                background-color: #007BFF;
+                color: #fff;
+                border-radius: 5px;
+            }
+
+                .pagination li a:hover {
+                    background-color: #0056b3;
+                }
+
+        .pagination .disabled {
+            pointer-events: none;
+            background-color: #ccc;
+        }
+
+    .table {
+        background-color: #fff;
+        border: 2px solid #7F0909; /* Gryffindor Red */
+        border-radius: 5px;
+        margin: 10px 0;
+        font-family: 'Harry Potter', cursive; /* Use a Harry Potter font */
+    }
+
+        .table th {
+            background-color: #7F0909; /* Gryffindor Red */
+            color: #FFD100; /* Gryffindor Gold */
+        }
+
+        .table tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #e0e0e0;
+        }
+</style>
+<div class="row">
+
+    <div class="col-md-6">
+        <h2>Authors</h2>
+
+        <p>
+            <a href="#" class="create-link" data-url="@Url.Action("Create", "authors")">Create New Author</a>
+        </p>
+
+        <table class="table" style="width:100%">
+            <tr>
+                <th>
+                    First Name
+                </th>
+                <th>
+                    Last Name
+                </th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Authors)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.surname)
+                    </td>
+                    <td class="text-end">
+                        <!-- Add text-end class here -->
+                        <a href="#" class="edit-link" data-url="@Url.Action("Edit", "authors", new { id = item.authorId })">Edit</a>
+                        <a href="#" class="details-link" data-url="@Url.Action("Details", "authors", new { id = item.authorId })">Details</a>
+                        <a href="#" class="delete-link" data-url="@Url.Action("Delete", "authors", new { id = item.authorId })">Delete</a>
+                    </td>
+                </tr>
+            }
+        </table>
+        <div>
+            @Html.PagedListPager(
+                (PagedList.IPagedList)Model.Authors,
+                page => Url.Action("MaintainIndex", new { page1 = page, page2 = Model.Types.PageNumber, page3 = Model.Borrows.PageNumber }))
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <h2>Types</h2>
+
+        <p>
+            <a href="#" class="create-link" data-url="@Url.Action("Create", "types")">Create New Type</a>
+        </p>
+
+        <table class="table" style="width:100%">
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Types)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.name)
+                    </td>
+                    <td>
+                        <a href="#" class="edit-link" data-url="@Url.Action("Edit", "types", new { id = item.typeId })">Edit</a>
+                        <a href="#" class="details-link" data-url="@Url.Action("Details", "types", new { id = item.typeId })">Details</a>
+                        <a href="#" class="delete-link" data-url="@Url.Action("Delete", "types", new { id = item.typeId })">Delete</a>
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <div>
+            @Html.PagedListPager(
+                (PagedList.IPagedList)Model.Types,
+                page => Url.Action("MaintainIndex", new { page1 = Model.Authors.PageNumber, page2 = page, page3 = Model.Borrows.PageNumber }))
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Borrows</h2>
+
+        <p>
+            <a href="#" class="create-link" data-url="@Url.Action("Create", "borrows")">Create New Borrow</a>
+        </p>
+
+        <table class="table" style="width:100%">
+            <tr>
+                <th>
+                    Student Name
+                </th>
+                <th>
+                    Book Name
+                </th>
+                <th>
+                    Taken Date
+                </th>
+                <th>
+                    Brought Date
+                </th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Borrows)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.students.name)  @Html.DisplayFor(modelItem => item.students.surname)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.books.name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.takenDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.broughtDate)
+                    </td>
+                    <td>
+                        <a href="#" class="edit-link" data-url="@Url.Action("Edit", "borrows", new { id = item.borrowId })">Edit</a>
+                        <a href="#" class="details-link" data-url="@Url.Action("Details", "borrows", new { id = item.borrowId })">Details</a>
+                        <a href="#" class="delete-link" data-url="@Url.Action("Delete", "borrows", new { id = item.borrowId })">Delete</a>
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <div>
+            @Html.PagedListPager(
+                (PagedList.IPagedList)Model.Borrows,
+                page => Url.Action("MaintainIndex", new { page1 = Model.Authors.PageNumber, page2 = Model.Types.PageNumber, page3 = page }))
+        </div>
+    </div>
+</div>
+
+
+
+<div id="myModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sample Async CRUD</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-content">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(function () {
+        // Function to handle Edit link click event in the Combined View and Details modal
+        $(".edit-link, .edit-link-in-modal").click(function (e) {
+            e.preventDefault();
+            var url = $(this).data("url");
+
+            $.get(url, function (data) {
+                $("#modal-content").empty();
+                $("#modal-content").html(data);
+                $("#myModal").modal("show");
+            });
+        });
+
+        // Function to handle form submission within the modal
+        $("#modal-content").on("submit", "form", function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr("action");
+
+            /*The code you provided, var formData = form.serialize();, is used to serialize
+            the form data entered by a user into a format that can be easily transmitted to a server, typically as part of an HTTP request.
+            This is commonly used in web applications to send data to a server for processing, often in the context of form submissions.*/
+            var formData = form.serialize();
+
+            /*Works for any submit CRUD (except read obviously) operation */
+            $.post(url, formData, function (data) {
+                $("#myModal").modal("hide");
+                location.reload();
+            });
+        });
+
+        // Function to handle other links (details, delete, create) within the modal
+        $(".details-link, .delete-link, .create-link, .create-lookup-link").click(function (e) {
+            e.preventDefault();
+            var url = $(this).data("url");
+
+            $.get(url, function (data) {
+                $("#modal-content").empty();
+                $("#modal-content").html(data);
+                $("#myModal").modal("show");
+            });
+        });
+    });
+</script>

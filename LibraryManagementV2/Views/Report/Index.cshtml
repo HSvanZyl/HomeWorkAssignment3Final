@@ -1,0 +1,133 @@
+﻿@model List<LibraryManagementV2.Models.BookReportModel>
+@{
+    ViewBag.Title = "MostPopularBooks";
+}
+<style>
+
+    h2 {
+        color: #7F0909; /* Gryffindor red */
+    }
+
+    select, button {
+        background-color: #7F0909; /* Gryffindor red */
+        color: #FFD700; /* Gryffindor gold */
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+        select:hover, button:hover {
+            background-color: #A00000; /* Slightly darker red */
+        }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    th, td {
+        border: 1px solid #7F0909; /* Gryffindor red */
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #FFD700; /* Gryffindor gold */
+        color: #7F0909; /* Gryffindor red */
+    }
+
+    tr:nth-child(even) {
+        background-color: #FFD700; /* Gryffindor gold */
+    }
+</style>
+<h2>Most Popular Books for Final Quarter (October-December)</h2>
+
+<div id="popularBooksChart" style="height: 300px; width: 100%;"></div>
+
+@using (Html.BeginForm("DownloadReport", "Report", FormMethod.Post))
+{
+    @Html.TextBox("fileName", null, new { placeholder = "Enter filename", required = "required" })
+
+    <select name="fileType" required>
+        <option value="png">PNG</option>
+        <option value="jpeg">JPEG</option>
+        <option value="pdf">PDF</option> <!-- Added PDF option -->
+    </select>
+
+    <button type="submit">Download Report</button>
+}
+
+<h2>Document Archive</h2>
+<table>
+    @foreach (var file in Directory.GetFiles(Server.MapPath("~/Documents")))
+    {
+        var fileName = Path.GetFileName(file);
+        <tr>
+            <td>@fileName</td>
+            <td>
+                <a href="@Url.Action("DisplayFile", "Report", new { fileName = fileName })">Download</a>
+                <a href="@Url.Action("DeleteFile", "Report", new { fileName = fileName })">Delete</a>
+            </td>
+        </tr>
+    }
+</table>
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script>
+    // Prepare data for CanvasJS
+    var dataPoints = @Html.Raw(Json.Encode(Model.Select(item => new { label = item.BookName, y = item.BorrowCount })));
+
+    // Create the chart
+    var chart = new CanvasJS.Chart("popularBooksChart", {
+        animationEnabled: true,
+        title: {
+            text: "Most Popular Books"
+        },
+        data: [{
+            type: "column",
+            dataPoints: dataPoints
+        }]
+    });
+
+    chart.render();
+
+    // Capture the chart as an image or PDF using html2canvas and pdfmake
+    document.querySelector('button[type="submit"]').addEventListener('click', function (e) {
+        e.preventDefault();
+        html2canvas(document.getElementById('popularBooksChart')).then(function (canvas) {
+            var chartImage = canvas.toDataURL("image/png"); // Default format is PNG
+
+            var selectedFileType = document.querySelector('select[name="fileType"]').value;
+            if (selectedFileType === 'pdf') {
+                // Create a PDF document using pdfmake
+                var pdfDefinition = {
+                    content: [
+                        { text: 'Most Popular Books', style: 'header' },
+                        { image: chartImage, width: 500 }, // Add the chart as an image
+                    ],
+                    styles: {
+                        header: { fontSize: 18, bold: true, alignment: 'center' }
+                    }
+                };
+
+                var pdfFileName = document.querySelector('input[name="fileName"]').value + '.pdf';
+
+                // Create and save the PDF
+                pdfMake.createPdf(pdfDefinition).download(pdfFileName);
+            } else {
+                // Set the captured chart image as a hidden input value for other formats
+                var chartImageInput = document.createElement("input");
+                chartImageInput.setAttribute("type", "hidden");
+                chartImageInput.setAttribute("name", "capturedChartImage");
+                chartImageInput.setAttribute("value", chartImage);
+                document.querySelector('form').appendChild(chartImageInput);
+                // Submit the form
+                document.querySelector('form').submit();
+            }
+        });
+    });
+</script>
